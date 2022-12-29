@@ -14,12 +14,18 @@ pub fn view(app: &App, model: &Model, frame: Frame) {
     // Draw particles
     if !model.paused {
         for particle in &model.particles {
+            let color = hsva(
+                (std::f64::consts::TAU as f32 * particle.age / model.config.lifetime).sin(),
+                1.0,
+                0.8,
+                1.0,
+            );
             draw.ellipse()
                 .resolution(4.0)
                 .x_y(particle.position.x, particle.position.y)
                 .w(2.0)
                 .h(2.0)
-                .color(WHITE);
+                .color(color);
         }
 
         // Clear fade
@@ -29,10 +35,10 @@ pub fn view(app: &App, model: &Model, frame: Frame) {
             .color(srgba(0.0, 0.0, 0.0, model.config.fading));
     }
     // Info
-    let side = 120.0;
-    let height = 45.0;
+    let side = 120f32;
+    let height = 70f32;
     let top_left = pt2(-(WIDTH as f32 / 2.0), HEIGHT as f32 / 2.0);
-    let offset = vec2(side, -20.0);
+    let offset = vec2(side, -30.0);
     let xy = top_left + offset;
     draw.rect()
         .xy(top_left + vec2(side / 2.0, -height / 2.0))
@@ -45,11 +51,14 @@ pub fn view(app: &App, model: &Model, frame: Frame) {
     } else {
         "not drawing"
     };
+    let paused = if model.paused { "paused" } else { "running" };
     draw.text(&*format!(
-        "fps = {:.1}\nparticles = {}\n{}",
+        "fps = {:.1}\nparticles = {}\nscale = {}\n{}\n{}",
         framerate,
         model.particles.len(),
-        drawing
+        model.config.scale,
+        drawing,
+        paused
     ))
     .font_size(12)
     .xy(xy)

@@ -28,6 +28,12 @@ pub fn event(_app: &App, model: &mut Model, event: WindowEvent) {
                 model.particles.clear();
                 model.clear = true;
             }
+            VirtualKeyCode::P => {
+                model.config.scale += 0.5;
+            }
+            VirtualKeyCode::O => {
+                model.config.scale -= 0.5;
+            }
             VirtualKeyCode::Escape => {
                 std::process::exit(0);
             }

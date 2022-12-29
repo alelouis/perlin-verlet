@@ -27,7 +27,7 @@ pub fn model(app: &App) -> Model {
 
     let config: Config = toml::from_str(include_str!("conf.toml")).unwrap();
     let framerates = vec![60.0; 120];
-    let mut particles: Vec<Particle> = vec![];
+    let particles: Vec<Particle> = vec![];
     let noise = Perlin::new();
 
     Model {

@@ -30,12 +30,14 @@ pub fn update(app: &App, model: &mut Model, _update: Update) {
             p.position = new_pos;
             p.speed = new_speed;
             p.acceleration = new_acc;
+            p.age += 1.0 / 60.0;
         }
         model.particles.retain(|p| {
             (p.position.x > -(WIDTH as f32) / 2.0)
                 & (p.position.x < (WIDTH as f32) / 2.0)
                 & (p.position.y > -(HEIGHT as f32) / 2.0)
                 & (p.position.y < (HEIGHT as f32) / 2.0)
+            //& (p.age < model.config.lifetime)
         });
     }
 }

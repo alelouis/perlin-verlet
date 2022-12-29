@@ -14,6 +14,7 @@ pub struct Particle {
     pub position: Vec2,
     pub speed: Vec2,
     pub acceleration: Vec2,
+    pub age: f32,
 }
 
 impl Particle {
@@ -22,6 +23,7 @@ impl Particle {
             position,
             speed,
             acceleration,
+            age: 0f32,
         }
     }
 }
@@ -33,4 +35,5 @@ pub struct Config {
     dt: f32,
     time_dilation: f32,
     fading: f32,
+    lifetime: f32,
 }

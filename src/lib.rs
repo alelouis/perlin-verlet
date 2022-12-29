@@ -1,8 +1,9 @@
-pub mod model;
 pub mod controller;
+pub mod model;
 mod view;
 
 use nannou::prelude::*;
+use serde::Deserialize;
 
 const WIDTH: u32 = 1200;
 const HEIGHT: u32 = 700;
@@ -22,4 +23,13 @@ impl Particle {
             acceleration,
         }
     }
+}
+
+#[derive(Deserialize)]
+pub struct Config {
+    n_particles: u32,
+    scale: f32,
+    dt: f32,
+    time_dilation: f32,
+    fading: f32,
 }

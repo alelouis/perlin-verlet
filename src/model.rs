@@ -1,25 +1,29 @@
-use crate::{Particle, WIDTH, HEIGHT};
-use nannou::prelude::*;
-use nannou::noise::Perlin;
 use crate::view::view;
+use crate::{Config, Particle, HEIGHT, WIDTH};
+use nannou::noise::Perlin;
+use nannou::prelude::*;
 
 pub struct Model {
     _window: window::Id,
     pub(crate) particles: Vec<Particle>,
     pub(crate) noise: Perlin,
+    pub(crate) config: Config,
 }
 
 pub fn model(app: &App) -> Model {
     let _window = app
         .new_window()
+        .title("dev")
         .size(WIDTH, HEIGHT)
         .view(view)
         .build()
         .unwrap();
+
+    let config: Config = toml::from_str(include_str!("conf.toml")).unwrap();
+
     let mut particles: Vec<Particle> = vec![];
     let noise = Perlin::new();
-    let n_particles = 10000;
-    for _ in 0..n_particles {
+    for _ in 0..config.n_particles {
         particles.push(Particle::new(
             vec2(
                 random_range(-(WIDTH as f32) / 2.0, (WIDTH as f32) / 2.0),
@@ -34,5 +38,6 @@ pub fn model(app: &App) -> Model {
         _window,
         particles,
         noise,
+        config,
     }
 }

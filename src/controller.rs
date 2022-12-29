@@ -7,6 +7,8 @@ pub fn update(app: &App, model: &mut Model, _update: Update) {
     let dt = model.config.dt;
     let scale = model.config.scale;
     let time = app.time / model.config.time_dilation;
+    model.framerates[0] = 1.0 / app.duration.since_prev_update.as_secs_f32();
+    model.framerates.rotate_left(1);
     for p in model.particles.iter_mut() {
         let new_pos = p.position + p.speed * dt + 0.5 * p.acceleration * dt.powi(2);
         let acc_x = 1.0
@@ -28,4 +30,10 @@ pub fn update(app: &App, model: &mut Model, _update: Update) {
         p.speed = new_speed;
         p.acceleration = new_acc;
     }
+    model.particles.retain(|p| {
+        (p.position.x > -(WIDTH as f32) / 2.0)
+            & (p.position.x < (WIDTH as f32) / 2.0)
+            & (p.position.y > -(HEIGHT as f32) / 2.0)
+            & (p.position.y < (HEIGHT as f32) / 2.0)
+    });
 }

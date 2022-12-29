@@ -28,19 +28,27 @@ pub fn view(app: &App, model: &Model, frame: Frame) {
         .color(srgba(0.0, 0.0, 0.0, model.config.fading));
 
     // Info display
-    let side = 30.0;
+    let side = 120.0;
+    let height = 45.0;
     let top_left = pt2(-(WIDTH as f32 / 2.0), HEIGHT as f32 / 2.0);
-    let offset = vec2(side, -side / 2.0);
+    let offset = vec2(side, -20.0);
     let xy = top_left + offset;
-    draw.rect().xy(xy).w_h(side * 2.0, side).color(BLACK);
+    draw.rect()
+        .xy(top_left + vec2(side / 2.0, -height / 2.0))
+        .w_h(side, height)
+        .color(BLACK);
 
-    // Framerate
+    // Info
+    let framerate: f32 = model.framerates.iter().sum::<f32>() / model.framerates.len() as f32;
     draw.text(&*format!(
-        "fps = {:.1?}",
-        1.0 / app.duration.since_prev_update.as_secs_f32()
+        "fps = {:.1}\nparticles = {}",
+        framerate,
+        model.particles.len()
     ))
     .font_size(12)
-    .xy(xy);
+    .xy(xy)
+    .left_justify()
+    .line_spacing(0.01);
 
     // Frame update
     draw.to_frame(app, &frame).unwrap();

@@ -6,6 +6,7 @@ use nannou::prelude::*;
 pub struct Model {
     _window: window::Id,
     pub(crate) particles: Vec<Particle>,
+    pub(crate) framerates: Vec<f32>,
     pub(crate) noise: Perlin,
     pub(crate) config: Config,
 }
@@ -20,7 +21,7 @@ pub fn model(app: &App) -> Model {
         .unwrap();
 
     let config: Config = toml::from_str(include_str!("conf.toml")).unwrap();
-
+    let framerates = vec![0.0; 120];
     let mut particles: Vec<Particle> = vec![];
     let noise = Perlin::new();
     for _ in 0..config.n_particles {
@@ -37,6 +38,7 @@ pub fn model(app: &App) -> Model {
     Model {
         _window,
         particles,
+        framerates,
         noise,
         config,
     }

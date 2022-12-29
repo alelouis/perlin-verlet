@@ -1,4 +1,5 @@
 pub mod controller;
+pub mod events;
 pub mod model;
 mod view;
 

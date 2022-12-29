@@ -12,22 +12,23 @@ pub fn view(app: &App, model: &Model, frame: Frame) {
     }
 
     // Draw particles
-    for particle in &model.particles {
-        draw.ellipse()
-            .resolution(4.0)
-            .x_y(particle.position.x, particle.position.y)
-            .w(2.0)
-            .h(2.0)
-            .color(WHITE);
+    if !model.paused {
+        for particle in &model.particles {
+            draw.ellipse()
+                .resolution(4.0)
+                .x_y(particle.position.x, particle.position.y)
+                .w(2.0)
+                .h(2.0)
+                .color(WHITE);
+        }
+
+        // Clear fade
+        draw.rect()
+            .width(WIDTH as f32)
+            .h(HEIGHT as f32)
+            .color(srgba(0.0, 0.0, 0.0, model.config.fading));
     }
-
-    // Clear fade
-    draw.rect()
-        .width(WIDTH as f32)
-        .h(HEIGHT as f32)
-        .color(srgba(0.0, 0.0, 0.0, model.config.fading));
-
-    // Info display
+    // Info
     let side = 120.0;
     let height = 45.0;
     let top_left = pt2(-(WIDTH as f32 / 2.0), HEIGHT as f32 / 2.0);
@@ -38,7 +39,6 @@ pub fn view(app: &App, model: &Model, frame: Frame) {
         .w_h(side, height)
         .color(BLACK);
 
-    // Info
     let framerate: f32 = model.framerates.iter().sum::<f32>() / model.framerates.len() as f32;
     draw.text(&*format!(
         "fps = {:.1}\nparticles = {}",

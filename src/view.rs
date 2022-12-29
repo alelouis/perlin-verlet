@@ -7,7 +7,7 @@ pub fn view(app: &App, model: &Model, frame: Frame) {
     let draw = app.draw();
 
     // First clear
-    if app.elapsed_frames() < 1 {
+    if (app.elapsed_frames() < 1) | (model.clear) {
         frame.clear(BLACK);
     }
 
@@ -40,10 +40,16 @@ pub fn view(app: &App, model: &Model, frame: Frame) {
         .color(BLACK);
 
     let framerate: f32 = model.framerates.iter().sum::<f32>() / model.framerates.len() as f32;
+    let drawing = if model.drawing {
+        "drawing"
+    } else {
+        "not drawing"
+    };
     draw.text(&*format!(
-        "fps = {:.1}\nparticles = {}",
+        "fps = {:.1}\nparticles = {}\n{}",
         framerate,
-        model.particles.len()
+        model.particles.len(),
+        drawing
     ))
     .font_size(12)
     .xy(xy)

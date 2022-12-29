@@ -11,6 +11,8 @@ pub struct Model {
     pub(crate) noise: Perlin,
     pub(crate) config: Config,
     pub(crate) paused: bool,
+    pub(crate) drawing: bool,
+    pub(crate) clear: bool,
 }
 
 pub fn model(app: &App) -> Model {
@@ -27,16 +29,6 @@ pub fn model(app: &App) -> Model {
     let framerates = vec![60.0; 120];
     let mut particles: Vec<Particle> = vec![];
     let noise = Perlin::new();
-    for _ in 0..config.n_particles {
-        particles.push(Particle::new(
-            vec2(
-                random_range(-(WIDTH as f32) / 2.0, (WIDTH as f32) / 2.0),
-                random_range(-(HEIGHT as f32) / 2.0, (HEIGHT as f32) / 2.0),
-            ),
-            Default::default(),
-            Default::default(),
-        ));
-    }
 
     Model {
         _window,
@@ -45,5 +37,7 @@ pub fn model(app: &App) -> Model {
         noise,
         config,
         paused: false,
+        drawing: false,
+        clear: false,
     }
 }

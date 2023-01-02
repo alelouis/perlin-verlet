@@ -37,3 +37,13 @@ pub struct Config {
     fading: f32,
     lifetime: f32,
 }
+
+fn compute_ellipse(radius: f32) -> [Point3; 8] {
+    let points: [Point3; 8] = (0..8)
+        .map(|k| (2.0 * PI * k as f32 / 8.0))
+        .map(|k| pt3(radius * (k as f32).cos(), radius * (k as f32).sin(), 0.0))
+        .collect::<Vec<_>>()
+        .try_into()
+        .expect("wrong size iterator");
+    points
+}

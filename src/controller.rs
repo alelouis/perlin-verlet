@@ -25,11 +25,12 @@ pub fn update(app: &App, model: &mut Model, _update: Update) {
                     (time + 1.0) as f64,
                 ]);
             let new_acc = Vec2::new(acc_x as f32, acc_y as f32);
-            let mut new_speed = p.speed + 0.5 * (p.acceleration + new_acc) * dt;
-            new_speed = new_speed.clamp_length(0.0, 0.1);
+            let new_speed = p.speed + 0.5 * (p.acceleration + new_acc) * dt;
+            //new_speed = new_speed.clamp_length(0.0, 1.0);
             p.position = new_pos;
             p.speed = new_speed;
-            p.acceleration = new_acc;
+            let friction = 0.8f32;
+            p.acceleration = new_acc - friction * new_speed;
             p.age += 1.0 / 60.0;
         }
         model.particles.retain(|p| {

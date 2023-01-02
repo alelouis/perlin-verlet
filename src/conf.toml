@@ -3,4 +3,4 @@ scale = 10.0
 dt = 1.0
 time_dilation = 1000.0
 fading = 0.01
-lifetime = 10.0
+lifetime = 30.0

@@ -1,6 +1,6 @@
 use crate::events::event;
 use crate::view::view;
-use crate::{Config, Particle, HEIGHT, WIDTH};
+use crate::{compute_ellipse, Config, Particle, HEIGHT, WIDTH};
 use nannou::noise::Perlin;
 use nannou::prelude::*;
 
@@ -13,6 +13,7 @@ pub struct Model {
     pub(crate) paused: bool,
     pub(crate) drawing: bool,
     pub(crate) clear: bool,
+    pub(crate) ellipse: [Point3; 8],
 }
 
 pub fn model(app: &App) -> Model {
@@ -29,6 +30,7 @@ pub fn model(app: &App) -> Model {
     let framerates = vec![60.0; 120];
     let particles: Vec<Particle> = vec![];
     let noise = Perlin::new();
+    let ellipse = compute_ellipse(1.0);
 
     Model {
         _window,
@@ -36,6 +38,7 @@ pub fn model(app: &App) -> Model {
         framerates,
         noise,
         config,
+        ellipse,
         paused: false,
         drawing: false,
         clear: false,

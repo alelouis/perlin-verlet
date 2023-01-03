@@ -12,7 +12,7 @@ pub fn view(app: &App, model: &Model, frame: Frame) {
     world_draw = world_draw.translate(vec3(model.center.x, model.center.y, 0.0));
 
     let mut tris: Vec<Tri> =
-        vec![Tri([pt3(0.0, 0.0, 0.0), pt3(0.0, 0.0, 0.0), pt3(0.0, 0.0, 0.0),]); 200_000];
+        vec![Tri([pt3(0.0, 0.0, 0.0), pt3(0.0, 0.0, 0.0), pt3(0.0, 0.0, 0.0),]); 100_000];
 
     // Draw particles
     frame.clear(BLACK);
@@ -27,25 +27,6 @@ pub fn view(app: &App, model: &Model, frame: Frame) {
             tri_len += 1;
         }
     }
-
-    // for particle in &model.particles {
-    //     for _ in 0..6 {
-    //         colors.push(hsva(
-    //             (TAU as f32 * particle.age / model.config.lifetime).sin(),
-    //             1.0,
-    //             0.8,
-    //             1.0,
-    //         ))
-    //     }
-    // }
-
-    // let tris_col = tris
-    //     .iter()
-    //     .zip(colors)
-    //     .map(|(tri, color)| tri.map_vertices(|v| (v, color)));
-
-    // Draw colors
-    // world_draw.mesh().tris_colored(tris_col);
 
     world_draw.mesh().tris(tris);
 

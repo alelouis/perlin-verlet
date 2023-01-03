@@ -35,7 +35,7 @@ pub fn model(app: &App) -> Model {
     let framerates = vec![60.0; 120];
     let particles: Vec<Particle> = vec![];
     let noise = Perlin::new();
-    let ellipse = compute_ellipse(1.0);
+    let ellipse = compute_ellipse(3.0);
 
     Model {
         _window,

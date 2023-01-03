@@ -8,59 +8,52 @@ pub fn view(app: &App, model: &Model, frame: Frame) {
     // Get draw
     let mut world_draw = app.draw();
     let ui_draw = app.draw();
-    world_draw = world_draw.scale(10.0);
+    world_draw = world_draw.scale(model.scale);
+    world_draw = world_draw.translate(vec3(model.center.x, model.center.y, 0.0));
 
-    // First clear
-    if (app.elapsed_frames() < 1) | (model.clear) {
-        frame.clear(BLACK);
-    }
-    let mut tris: Vec<Tri> = vec![];
-    let mut colors: Vec<Hsva> = vec![];
+    let mut tris: Vec<Tri> =
+        vec![Tri([pt3(0.0, 0.0, 0.0), pt3(0.0, 0.0, 0.0), pt3(0.0, 0.0, 0.0),]); 200_000];
 
     // Draw particles
-    if !model.paused {
-        for particle in &model.particles {
-            for i in 0..6 {
-                tris.push(Tri([
-                    model.ellipse[0] + particle.position.extend(0.0),
-                    model.ellipse[i + 1] + particle.position.extend(0.0),
-                    model.ellipse[i + 2] + particle.position.extend(0.0),
-                ]));
+    frame.clear(BLACK);
+    let mut tri_len = 0;
+    for (idx_part, particle) in model.particles.iter().enumerate() {
+        for (idx_tri, ell_tri) in model.ellipse.iter().enumerate() {
+            let mut ell_tri_trans = [pt3(0.0, 0.0, 0.0); 3];
+            for i in 0..3 {
+                ell_tri_trans[i] = ell_tri[i] + particle.position.extend(0.0);
             }
+            tris[idx_part * 6 + idx_tri] = Tri(ell_tri_trans);
+            tri_len += 1;
         }
-
-        for particle in &model.particles {
-            for _ in 0..6 {
-                colors.push(hsva(
-                    (TAU as f32 * particle.age / model.config.lifetime).sin(),
-                    1.0,
-                    0.8,
-                    1.0,
-                ))
-            }
-        }
-
-        let tris_col = tris
-            .iter()
-            .zip(colors)
-            .map(|(tri, color)| tri.map_vertices(|v| (v, color)));
-
-        // Draw colors
-        world_draw.mesh().tris_colored(tris_col);
-
-        // Clear fade
-        world_draw
-            .rect()
-            .width(WIDTH as f32)
-            .h(HEIGHT as f32)
-            .color(srgba(0.0, 0.0, 0.0, model.config.fading));
     }
+
+    // for particle in &model.particles {
+    //     for _ in 0..6 {
+    //         colors.push(hsva(
+    //             (TAU as f32 * particle.age / model.config.lifetime).sin(),
+    //             1.0,
+    //             0.8,
+    //             1.0,
+    //         ))
+    //     }
+    // }
+
+    // let tris_col = tris
+    //     .iter()
+    //     .zip(colors)
+    //     .map(|(tri, color)| tri.map_vertices(|v| (v, color)));
+
+    // Draw colors
+    // world_draw.mesh().tris_colored(tris_col);
+
+    world_draw.mesh().tris(tris);
 
     // Info
     let side = 120f32;
-    let height = 70f32;
+    let height = 100f32;
     let top_left = pt2(-(WIDTH as f32 / 2.0), HEIGHT as f32 / 2.0);
-    let offset = vec2(side, -30.0);
+    let offset = vec2(side, -50.0);
     let xy = top_left + offset;
     ui_draw
         .rect()
@@ -77,9 +70,11 @@ pub fn view(app: &App, model: &Model, frame: Frame) {
     let paused = if model.paused { "paused" } else { "running" };
     ui_draw
         .text(&*format!(
-            "fps = {:.1}\nparticles = {}\nscale = {}\n{}\n{}",
+            "fps = {:.1}\nzoom = {:.1}\nparticles = {}\ntriangles = {}\nscale = {}\n{}\n{}",
             framerate,
+            model.scale,
             model.particles.len(),
+            tri_len,
             model.config.scale,
             drawing,
             paused

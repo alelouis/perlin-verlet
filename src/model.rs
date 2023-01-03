@@ -13,7 +13,12 @@ pub struct Model {
     pub(crate) paused: bool,
     pub(crate) drawing: bool,
     pub(crate) clear: bool,
-    pub(crate) ellipse: [Point3; 8],
+    pub(crate) ellipse: [[Point3; 3]; 6],
+    pub(crate) center: Vec2,
+    pub(crate) previous_center: Vec2,
+    pub(crate) scale: f32,
+    pub(crate) mouse_pressed: bool,
+    pub(crate) pressed_location: Point2,
 }
 
 pub fn model(app: &App) -> Model {
@@ -42,5 +47,10 @@ pub fn model(app: &App) -> Model {
         paused: false,
         drawing: false,
         clear: false,
+        scale: 1.0,
+        center: vec2(0.0, 0.0),
+        previous_center: vec2(0.0, 0.0),
+        mouse_pressed: false,
+        pressed_location: pt2(0.0, 0.0),
     }
 }

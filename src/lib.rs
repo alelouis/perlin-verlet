@@ -3,7 +3,7 @@ pub mod events;
 pub mod model;
 mod view;
 
-use nannou::geom::Tri;
+use nannou::geom::{Quad, Tri};
 use nannou::prelude::*;
 use serde::Deserialize;
 
@@ -13,19 +13,32 @@ const HEIGHT: u32 = 700;
 #[derive(Default, Debug)]
 pub struct Particle {
     pub position: Vec2,
-    pub speed: Vec2,
+    pub position_old: Vec2,
     pub acceleration: Vec2,
     pub age: f32,
+    pub radius: f32,
 }
 
 impl Particle {
-    pub fn new(position: Vec2, speed: Vec2, acceleration: Vec2) -> Self {
+    pub fn new(position: Vec2, acceleration: Vec2, radius: f32) -> Self {
         Self {
             position,
-            speed,
+            position_old: position,
             acceleration,
             age: 0f32,
+            radius,
         }
+    }
+
+    pub fn update_position(&mut self, dt: f32) {
+        let velocity = self.position - self.position_old;
+        self.position_old = self.position;
+        self.position = self.position + velocity + self.acceleration * dt * dt;
+        self.acceleration = vec2(0.0, 0.0);
+    }
+
+    pub fn accelerate(&mut self, acc: Vec2) {
+        self.acceleration += acc;
     }
 }
 
@@ -39,18 +52,13 @@ pub struct Config {
     lifetime: f32,
 }
 
-fn compute_ellipse(radius: f32) -> [[Point3; 3]; 6] {
-    let points: [Point3; 8] = (0..8)
-        .map(|k| (2.0 * PI * k as f32 / 8.0))
-        .map(|k| pt3(radius * (k as f32).cos(), radius * (k as f32).sin(), 0.0))
-        .collect::<Vec<_>>()
-        .try_into()
-        .expect("wrong size iterator");
-    let mut tris: [[Point3; 3]; 6] = [[pt3(0.0, 0.0, 0.0); 3]; 6];
-    for i in 0..6 {
-        tris[i][0] = points[0];
-        tris[i][1] = points[i + 1];
-        tris[i][2] = points[i + 2];
-    }
-    tris
+fn generate_quad(width: f32, offset: Vec2) -> Quad<Point2> {
+    let halfw = width;
+    let quad = geom::Quad::from([
+        pt2(-0.5 * halfw + offset.x, 0.5 * halfw + offset.y),
+        pt2(0.5 * halfw + offset.x, 0.5 * halfw + offset.y),
+        pt2(0.5 * halfw + offset.x, -0.5 * halfw + offset.y),
+        pt2(-0.5 * halfw + offset.x, -0.5 * halfw + offset.y),
+    ]);
+    quad
 }

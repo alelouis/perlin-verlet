@@ -1,6 +1,8 @@
 use crate::model::Model;
-use crate::{HEIGHT, WIDTH};
+use crate::{generate_quad, HEIGHT, WIDTH};
+use nannou::draw::theme::Primitive::Quad;
 use nannou::geom::Tri;
+use nannou::mesh::TexCoords;
 use nannou::prelude::*;
 use std::f64::consts::TAU;
 
@@ -11,24 +13,45 @@ pub fn view(app: &App, model: &Model, frame: Frame) {
     world_draw = world_draw.scale(model.scale);
     world_draw = world_draw.translate(vec3(model.center.x, model.center.y, 0.0));
 
-    let mut tris: Vec<Tri> =
-        vec![Tri([pt3(0.0, 0.0, 0.0), pt3(0.0, 0.0, 0.0), pt3(0.0, 0.0, 0.0),]); 100_000];
-
-    // Draw particles
     frame.clear(BLACK);
-    let mut tri_len = 0;
-    for (idx_part, particle) in model.particles.iter().enumerate() {
-        for (idx_tri, ell_tri) in model.ellipse.iter().enumerate() {
-            let mut ell_tri_trans = [pt3(0.0, 0.0, 0.0); 3];
-            for i in 0..3 {
-                ell_tri_trans[i] = ell_tri[i] + particle.position.extend(0.0);
-            }
-            tris[idx_part * 6 + idx_tri] = Tri(ell_tri_trans);
-            tri_len += 1;
+    let mut points_texture: Vec<(Point3, Point2)> = vec![];
+    let mut points_color: Vec<(Point3, Hsva)> = vec![];
+    for particle in &model.particles {
+        let quad = generate_quad(particle.radius * 2.0, vec2(0.0, 0.0));
+        let p: Vec<(Point3, Point2, Hsva)> = quad
+            .triangles_iter()
+            .flat_map(Tri::vertices)
+            .map(|point| {
+                (
+                    pt3(
+                        point.x + particle.position.x,
+                        point.y + particle.position.y,
+                        0.0,
+                    ),
+                    pt2(
+                        point.x / (particle.radius * 2f32) + 0.5,
+                        point.y / (particle.radius * 2f32) + 0.5,
+                    ),
+                    hsva(
+                        map_range(particle.radius, 3.0, 6.0, 0.0, 1.0),
+                        1.0,
+                        1.0,
+                        1.0,
+                    ),
+                )
+            })
+            .collect();
+        for (p3, p2, hs) in p {
+            points_texture.push((p3, p2));
+            points_color.push((p3, hs));
         }
     }
 
-    world_draw.mesh().tris(tris);
+    // world_draw.mesh().points_colored(points_color);
+
+    world_draw
+        .mesh()
+        .points_textured(&model.texture, points_texture);
 
     // Info
     let side = 120f32;
@@ -51,11 +74,10 @@ pub fn view(app: &App, model: &Model, frame: Frame) {
     let paused = if model.paused { "paused" } else { "running" };
     ui_draw
         .text(&*format!(
-            "fps = {:.1}\nzoom = {:.1}\nparticles = {}\ntriangles = {}\nscale = {}\n{}\n{}",
+            "fps = {:.1}\nzoom = {:.1}\nparticles = {}\nscale = {}\n{}\n{}",
             framerate,
             model.scale,
             model.particles.len(),
-            tri_len,
             model.config.scale,
             drawing,
             paused

@@ -1,6 +1,6 @@
 n_particles = 1000
 scale = 10.0
-dt = 0.1
+dt = 0.01
 time_dilation = 1000.0
 fading = 1.0
 lifetime = 30.0

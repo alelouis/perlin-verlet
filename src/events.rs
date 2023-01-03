@@ -27,7 +27,7 @@ pub fn event(app: &App, model: &mut Model, event: WindowEvent) {
                             random_range(-(HEIGHT as f32) / 2.0, (HEIGHT as f32) / 2.0),
                         ),
                         Default::default(),
-                        Default::default(),
+                        random_range(3.0, 6.0),
                     ));
                 }
             }
@@ -59,10 +59,11 @@ pub fn event(app: &App, model: &mut Model, event: WindowEvent) {
         },
         MouseMoved(point) => {
             if model.drawing {
+                let radius = random_range(3.0, 6.0);
                 model.particles.push(Particle::new(
                     vec2(point.x, point.y),
                     Default::default(),
-                    Default::default(),
+                    radius,
                 ));
             }
             if model.mouse_pressed {

@@ -1,37 +1,79 @@
 use crate::model::Model;
-use crate::{HEIGHT, WIDTH};
+use crate::{Particle, HEIGHT, WIDTH};
 use nannou::noise::NoiseFn;
 use nannou::prelude::*;
 
+// https://youtu.be/lS_qeBy3aQI
+
 pub fn update(app: &App, model: &mut Model, _update: Update) {
     let dt = model.config.dt;
-    let scale = model.config.scale;
-    let time = app.time / model.config.time_dilation;
     model.framerates[0] = 1.0 / app.duration.since_prev_update.as_secs_f32();
     model.framerates.rotate_left(1);
-    if !model.paused {
-        for p in model.particles.iter_mut() {
-            let new_pos = p.position + p.speed * dt + 0.5 * p.acceleration * dt.powi(2);
-            let new_acc = Vec2::new(0.0, -9.81);
-            let new_speed = p.speed + 0.5 * (p.acceleration + new_acc) * dt;
-            p.position = new_pos;
-            p.speed = new_speed;
-            let friction = 0.1f32;
-            p.acceleration = new_acc - friction * new_speed;
-            p.age += 1.0 / 60.0;
 
-            if p.position.y < -(HEIGHT as f32) / 2.0 {
-                p.position.y = 1.0 - (HEIGHT as f32) / 2.0;
-                p.speed.y = -p.speed.y;
+    let sub_steps = 8;
+    let sub_dt = dt / sub_steps as f32;
+    if !model.paused {
+        for i in 0..sub_steps {
+            apply_gravity(&mut model.particles);
+            update_positions(&mut model.particles, sub_dt);
+            apply_constraints(&mut model.particles);
+            solve_collisions(&mut model.particles);
+        }
+    }
+}
+
+fn apply_gravity(particles: &mut Vec<Particle>) {
+    let gravity = vec2(0.0, -1000.0);
+    for particle in particles {
+        particle.accelerate(gravity);
+    }
+}
+
+fn update_positions(particles: &mut Vec<Particle>, dt: f32) {
+    for particle in particles {
+        particle.update_position(dt);
+    }
+}
+
+fn solve_collisions(particles: &mut Vec<Particle>) {
+    for i in 0..particles.len() {
+        for j in i + 1..particles.len() {
+            let collision_axis = particles[i].position - particles[j].position;
+            let dist = collision_axis.length();
+            if dist < particles[i].radius + particles[j].radius {
+                let n = collision_axis / dist;
+                let delta = particles[i].radius + particles[j].radius - dist;
+                particles[i].position += 0.5 * delta * n;
+                particles[j].position -= 0.5 * delta * n;
             }
         }
+    }
+}
 
-        model.particles.retain(|p| {
-            (p.position.x > -(WIDTH as f32) / 2.0)
-                & (p.position.x < (WIDTH as f32) / 2.0)
-                & (p.position.y > -(HEIGHT as f32) / 2.0)
-                & (p.position.y < (HEIGHT as f32) / 2.0)
-            //& (p.age < model.config.lifetime)
-        });
+fn apply_constraints(particles: &mut Vec<Particle>) {
+    let position = vec2(0.0, 0.0);
+    let radius = 300f32;
+    for particle in particles {
+        // let to_particle = particle.position - position;
+        // let dist = to_particle.length();
+        // if dist > radius - particle.radius {
+        //     let n = to_particle / dist;
+        //     particle.position = position + n * (radius - particle.radius);
+        // }
+        let limit = -(WIDTH as f32) / 2.0 + particle.radius;
+        if particle.position.x < limit {
+            let d = particle.position.x - limit;
+            particle.position.x = particle.position.x - d;
+        }
+        let limit = (WIDTH as f32) / 2.0 - particle.radius;
+        if particle.position.x > limit {
+            let d = particle.position.x - limit;
+            particle.position.x = particle.position.x - d;
+        }
+        let limit = -(HEIGHT as f32) / 2.0 + particle.radius;
+        if particle.position.y <= limit {
+            let d = particle.position.y - limit;
+            particle.position.y = particle.position.y - d;
+        }
     }
 }
